@@ -50,7 +50,6 @@ class FriendshipsPlugin extends Gdn_Plugin {
 
   public function __construct() {
     parent::__construct();
-    //TODO: class not loaded at plugin enabling
     if (class_exists('FriendshipModel')) {
       $this->_FriendshipModel = new FriendshipModel();
     }
@@ -95,13 +94,31 @@ class FriendshipsPlugin extends Gdn_Plugin {
     //The first check is only for pedantic security, since guests can only have View Permission
     if(Gdn::Session()->IsValid() && CheckPermission('Friendships.Friends.RequestFriendship')){
       $this->_FriendshipAction('Request', Gdn::Session()->UserID, $Sender->RequestArgs[1]);
+      $User = $this->_UserModel->GetID($Sender->RequestArgs[1]);
+      $Email = new Gdn_Email();
+      $Email->Subject(sprintf(T('[%1$s] %2$s wants to be your friend', C('Garden.Title'), $User->Name)));
+      $Email->To($User->Email);
+      $Email->Message(
+        sprintf(
+           T('Hi %1$s,
+
+%2$s wants to be your friend. Visit your profile page to confirm this friendship request:
+
+%3$s'),
+           Gdn::Session()->User->Name,
+           $User->Name,
+           ExternalUrl('/profile' . $this->_ProfileUrl(Gdn::Session()->User->Name, Gdn::Session()->UserID))
+        )
+      );
+      $Email->Send();
     }
   }
 
   //dispatched from http://www.yourforum.com/plugin/Friendships/ConfirmFriendship
   public function Controller_ConfirmFriendship($Sender) {
-
-    //redirect to current session user profile page
+    if(Gdn::Session()->IsValid()){
+      $this->_FriendshipAction('Confirm', $Sender->RequestArgs[1], Gdn::Session()->UserID);
+    }
   }
 
   //dispatched from http://www.yourforum.com/plugin/Friendships/DeleteFriendship
@@ -112,9 +129,7 @@ class FriendshipsPlugin extends Gdn_Plugin {
   }
 
   public function ProfileController_BeforeRenderAsset_Handler($Sender, $Args) {
-    if($Args['AssetName'] == 'Content') {
-      //var_dump($this->_FriendshipModel->Get(1,2));
-    }
+    if($Args['AssetName'] == 'Content') {}
   }
 
   public function ProfileController_BeforeStatusForm_Handler($Sender) {}

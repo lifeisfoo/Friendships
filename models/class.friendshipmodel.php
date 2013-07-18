@@ -77,6 +77,14 @@ class FriendshipModel extends Gdn_Model {
   * @return array Users friends of $UserID
   */
   public function Friends($UserID) {
+    //only accepted
+    $FriendsIDs = $this->FriendsIDs($UserID);
+    $Friends = $this->SQL->Select('*')
+                      ->From('User u')
+                      ->WhereIn('u.UserID', $FriendsIDs)
+                      ->Get()
+                      ->Result();
+    return $Friends;
   }
 
   /**
@@ -86,7 +94,28 @@ class FriendshipModel extends Gdn_Model {
   * @access public
   * @return array of users IDs
   */
-  public static function FriendsIDs($UserID) {
+  public function FriendsIDs($UserID) {
+    //only accepted friendships
+    $IDs = array();
+    $Res = $this->SQL->Select('f.RequestedTo')
+                      ->From('Friendship f')
+                      ->Where('f.RequestedBy', $UserID)
+                      ->Where('f.Accepted is not null')
+                      ->Get()
+                      ->Result();
+    foreach ($Res as $User) {
+      array_push($IDs, $User->RequestedTo);
+    }
+    $Res2 = $this->SQL->Select('f.RequestedBy')
+                      ->From('Friendship f')
+                      ->Where('f.RequestedTo', $UserID)
+                      ->Where('f.Accepted is not null')
+                      ->Get()
+                      ->Result();
+    foreach ($Res2 as $User) {
+      array_push($IDs, $User->RequestedBy);
+    }
+    return $IDs;
   }
 
   /**
@@ -97,7 +126,7 @@ class FriendshipModel extends Gdn_Model {
   * @return a timestap if a friendship exists or NULL
   */
   public function FriendsFrom($AUserID, $BUserID) {
-    return NULL;
+    return $this->Get($AUserID, $BUserID)->Accepted;
   }
 
   /**
@@ -108,6 +137,7 @@ class FriendshipModel extends Gdn_Model {
   * @return a timestap if a friendship was requested or NULL
   */
   public function FriendshipRequested($AUserID, $BUserID) {
+    return $this->GetAbsolute($AUserID, $BUserID)->RequestedOn;
   }
 
   /**
@@ -118,7 +148,15 @@ class FriendshipModel extends Gdn_Model {
   * @return a array of pending request to the user
   */
   public function ReceivedPendingRequests($UserID) {
-    //join con username con campo RequestedByName
+    $Res = $this->SQL->Select('f.RequestedTo, f.RequestedBy, f.RequestedOn, f.Accepted')
+                      ->Select('u.Name', '', 'RequestedByName')
+                      ->From('Friendship f')
+                      ->Where('f.RequestedTo', $UserID)
+                      ->Where('f.Accepted', NULL)
+                      ->Join('User u', 'u.UserID = f.RequestedBy')
+                      ->Get()
+                      ->Result();
+    return $Res;
   }
 
   /**
@@ -129,19 +167,18 @@ class FriendshipModel extends Gdn_Model {
   */
   public function Delete($AUserID, $BUserID) {
     //Delete A->B
-    $this->SQL->Delete('Friendship',
+    $Del_A_B = $this->SQL->Delete('Friendship',
       array('RequestedBy' => $AUserID, 
             'RequestedTo' => $BUserID
             )
     );
     //Delete B->A
-    /* if enabled a user can delete also friendships requesto to him
-    $this->SQL->Delete('Friendship',
+    //if enabled a user can delete also friendships requesto to him
+    $Del_B_A = $this->SQL->Delete('Friendship',
       array('RequestedBy' => $BUserID, 
             'RequestedTo' => $AUserID
             )
     );
-    */
   }
 
   /**
@@ -151,21 +188,39 @@ class FriendshipModel extends Gdn_Model {
   * @access public
   */
   public function Request($AUserID, $BUserID) {
-    $this->SQL->Insert('Friendship', 
-      array('RequestedBy' => $AUserID, 
-            'RequestedTo' => $BUserID,
-            'RequestedOn' => Gdn_Format::ToDateTime()
-            )
-    );
+    if($this->GetAbsolute($BUserID, $AUserID)) {
+      $Reverse = $this->GetAbsolute($BUserID, $AUserID);
+      if(!$Reverse->Accepted) {
+        $this->Confirm($BUserID, $AUserID);
+      }
+    }elseif(!$this->GetAbsolute($AUserID, $BUserID)) {
+      $this->SQL->Insert('Friendship', 
+        array('RequestedBy' => $AUserID, 
+              'RequestedTo' => $BUserID,
+              'RequestedOn' => Gdn_Format::ToDateTime()
+              )
+      );
+    }else{
+      //exists yet, do nothing
+    }
   }
 
   /**
-  * 
+  * Confirm the friendship request by AUser to BUser
   * 
   * @since 0.1
   * @access public
   */
   public function Confirm($AUserID, $BUserID) {
+    if($this->GetAbsolute($AUserID, $BUserID)) {
+      $this->SQL->Update('Friendship')
+                ->Set('Accepted', Gdn_Format::ToDateTime())
+                ->Where('RequestedBy', $AUserID)
+                ->Where('RequestedTo', $BUserID)
+                ->Put();
+    }else{
+      //Friendship request doesn't exists
+    }
   }
 
 }

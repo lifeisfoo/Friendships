@@ -12,17 +12,13 @@ class FriendshipsModule extends Gdn_Module {
 		$this->_FriendshipModel = new FriendshipModel();
 	}
 
-	public function GetData() {
-
-	}
-
 	public function AssetTarget() {
 		return 'Panel';
 	}
 
 	private function _RequestLink($UserID) {
 		$Return = '';
-		$Return .= '<a class="Friendship RequestFriendship" href="' . Url("/plugin/Friendships/RequestFriendship/".$UserID) . '">';
+		$Return .= '<a class="Button Friendship RequestFriendship" href="' . Url("/plugin/Friendships/RequestFriendship/".$UserID) . '">';
 		$Return .= T('Request friendship');
 		$Return .= '</a>';
 		return $Return;
@@ -30,7 +26,7 @@ class FriendshipsModule extends Gdn_Module {
 
 	private function _ConfirmLinkWhitName($Friendship) {
 		$Return = '';
-		$Return .= '<a class="Friendship ConfirmFriendship" href="' . Url("/plugin/Friendships/ConfirmFriendship/".$Friendship->RequestedBy) . '">';
+		$Return .= '<a class="Button Friendship ConfirmFriendshipName" href="' . Url("/plugin/Friendships/ConfirmFriendship/".$Friendship->RequestedBy) . '">';
 		$Return .= sprintf(T('Confirm %1$s friendship'), $Friendship->RequestedByName);
 		$Return .= '</a>';
 		return $Return;
@@ -38,7 +34,7 @@ class FriendshipsModule extends Gdn_Module {
 
 	private function _ConfirmLink($UserID) {
 		$Return = '';
-		$Return .= '<a class="Friendship ConfirmFriendship" href="' . Url("/plugin/Friendships/ConfirmFriendship/".$UserID) . '">';
+		$Return .= '<a class="Button Friendship ConfirmFriendship" href="' . Url("/plugin/Friendships/ConfirmFriendship/".$UserID) . '">';
 		$Return .= T('Confirm friendship');
 		$Return .= '</a>';
 		return $Return;
@@ -46,20 +42,28 @@ class FriendshipsModule extends Gdn_Module {
 
 	private function _DeleteLink($UserID, $Text) {
 		$Return = '';
-		$Return .= '<a class="Friendship DeleteFriendship" href="' . Url("/plugin/Friendships/DeleteFriendship/". $UserID) . '">';
+		$Return .= '<a class="Button Friendship DeleteFriendship" href="' . Url("/plugin/Friendships/DeleteFriendship/". $UserID) . '">';
 		$Return .= T($Text);
 		$Return .= '</a>';
 		return $Return;
 	}
 
 	private function _FriendsList($UserID) {
-		return "TODO: FriendsList of ". $UserID;//avatar html
+		$Return .= '<h5>' . T('Friends list') . '</h5>';
+		$Return .= '<div class="Avatars">';
+		$Friends = $this->_FriendshipModel->Friends($UserID);
+		foreach ($Friends as $Friend) {
+			$Return .= UserPhoto($Friend);
+		}
+		$Return .= '</div>';
+		return $Return;
 	}
 
 	private function _ReceivedFriendshipRequests() {
 		$Return = '';
 		$PendingRequests = $this->_FriendshipModel->ReceivedPendingRequests(Gdn::Session()->UserID);
 		if(sizeof($PendingRequests) > 0) {
+			$Return .= '<h5>' . T('Pending requests') . '</h5>';
 			$Return .= '<ul class="FriendshipRequests">';
 			foreach ($PendingRequests as $Friendship) {
 				$Return .= $this->_ConfirmLinkWhitName($Friendship);
@@ -91,6 +95,7 @@ class FriendshipsModule extends Gdn_Module {
 			if(CheckPermission('Friendships.Friends.View')){
 				$ProfileOwnerID = $this->_Sender->User->UserID;
 				$String = '<div class="Box FriendshipsBox">';
+				$String .= '<h4>' . T('Friendships') . '</h4>';
 				if(Gdn::Session()->IsValid()){ //a logged user
 					$SessionUserID = Gdn::Session()->UserID;
 					//check if current user is on his page -> shows only his friend
@@ -102,7 +107,7 @@ class FriendshipsModule extends Gdn_Module {
 						//Check if a friendship exists or a friendship request exist: 'request' or 'confirm'
 						if($this->_FriendshipModel->FriendsFrom($SessionUserID, $ProfileOwnerID)){
 							if(CheckPermission('Friendships.Friends.DeleteFriendship')){
-								$String .= $this->_DeleteFriendshipButton();
+								$String .= $this->_DeleteFriendshipButton($ProfileOwnerID);
 							}	
 						}elseif($this->_FriendshipModel->Get($SessionUserID, $ProfileOwnerID)){
 							$Out = $this->_FriendshipModel->GetAbsolute($SessionUserID, $ProfileOwnerID);
@@ -118,10 +123,7 @@ class FriendshipsModule extends Gdn_Module {
 							}
 						}
 					}
-					$String .= '<br>' . $this->_FriendsList($ProfileOwnerID);
-					//echo "<pre>";
-					//var_dump($this->_Sender);
-					//exit();
+					$String .= $this->_FriendsList($ProfileOwnerID);
 				}else{//I'm guest -> I can have only view permission (internal vanilla security rule)
 					//show friends list
 					$String .= $this->_FriendsList($ProfileOwnerID);

@@ -6,11 +6,22 @@ Other plugins can be developed using this plugin data (e.g. "Show Friends Post",
 
 * Display friends list in user's profile page
 * Display "Send friendship request" button on every user's profile page
-* Send a notification when a friendship is requested
-* Every user has a (private) page where received, but not yet accepted, request are listed
-* Respect your privacy: the sender never know if you don't have accepted his request
+* Send an email when a friendship is requested
 
 Requires Vanilla >= 2.0.18.4
+
+##Customization
+In order to properly display users without avatar you need to create a ```/conf/bootstrap.before.php``` file in your vanilla installation directory and define a function inside it.
+
+```php
+if (!function_exists('UserPhotoDefaultUrl')) {
+function UserPhotoDefaultUrl($User){
+   return 'http://img841.imageshack.us/img841/6117/placeholdermale.png';
+}
+}
+``` 
+
+Vanilla will reuse this function every time an user don't have an avatar.
 
 ##Sponsor
 Thanks to [szarak](http://vanillaforums.org/profile/45649/szarak) for making this happen.
