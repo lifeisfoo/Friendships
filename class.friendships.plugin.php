@@ -45,26 +45,40 @@ class FriendshipsPlugin extends Gdn_Plugin {
     'ConfirmFriendship' => '/plugin/Friendships/ConfirmFriendship',
     'DeleteFriendship' => '/plugin/Friendships/DeleteFriendship'
   );
-  private $_FriendshipModel;
+  private $_FriendshipModel; //TODO: try to use internal DI like apps
+  private $_UserModel;
 
   public function __construct() {
     parent::__construct();
     //TODO: class not loaded at plugin enabling
-    $this->_FriendshipModel = new FriendshipModel();
+    if (class_exists('FriendshipModel')) {
+      $this->_FriendshipModel = new FriendshipModel();
+    }
+    if (class_exists('UserModel')) {
+      $this->_UserModel = new UserModel();
+    }
   }
-   
-  /**
-  * Base_Render_Before Event Hook
-  *
-  * This is a common hook that fires for all controllers (Base), on the Render method (Render), just 
-  * before execution of that method (Before). It is a good place to put UI stuff like CSS and Javascript 
-  * inclusions. Note that all the Controller logic has already been run at this point.
-  *
-  * @param $Sender Sending controller instance
-  */
+
+  private function _ProfileUrl($UserName, $UserID) {
+    $UserNameEnc = rawurlencode($UserName);
+    if ($UserNameEnc == $UserName) {
+      return $UserNameEnc;
+    } else {
+      return "$UserID/$UserNameEnc";
+    }
+  }
+
+  private function _FriendshipAction($Action, $FromUser, $ToUser){
+    if($FromUser && $ToUser) {
+      $this->_FriendshipModel->$Action($FromUser, $ToUser);
+      $UserTo = $this->_UserModel->GetID($ToUser);
+      Redirect('/profile/' . $this->_ProfileUrl($UserTo->Name, $ToUser));
+    }else{
+      Redirect('/');
+    }
+  }
+  
   public function Base_Render_Before($Sender) {
-    //$Sender->AddCssFile('example.css', 'plugins/Example');
-    //$Sender->AddJsFile('example.js', 'plugins/Example');
     $Module = new FriendshipsModule($Sender);
     $Sender->AddModule($Module);
   }
@@ -77,12 +91,11 @@ class FriendshipsPlugin extends Gdn_Plugin {
   public function Controller_Index($Sender) {}
 
   //dispatched from http://www.yourforum.com/plugin/Friendships/RequestFriendship
-  public function Controller_RequestFriendship($Sender, $Args) {
-    echo "<pre>";;
-    var_dump($Args);
-    print_r($Sender);
-    exit();
-    //redirect to profile user page
+  public function Controller_RequestFriendship($Sender) {
+    //The first check is only for pedantic security, since guests can only have View Permission
+    if(Gdn::Session()->IsValid() && CheckPermission('Friendships.Friends.RequestFriendship')){
+      $this->_FriendshipAction('Request', Gdn::Session()->UserID, $Sender->RequestArgs[1]);
+    }
   }
 
   //dispatched from http://www.yourforum.com/plugin/Friendships/ConfirmFriendship
@@ -92,17 +105,19 @@ class FriendshipsPlugin extends Gdn_Plugin {
   }
 
   //dispatched from http://www.yourforum.com/plugin/Friendships/DeleteFriendship
-  public function Controller_DeleteFriendship($Sender) {}
-
-  public function ProfileController_BeforeRenderAsset_Handler($Sender, $Args) {
-    if($Args['AssetName'] == 'Content') {
-      var_dump($this->_FriendshipModel->Get(1,2));
+  public function Controller_DeleteFriendship($Sender) {
+    if(Gdn::Session()->IsValid() && CheckPermission('Friendships.Friends.DeleteFriendship')){
+      $this->_FriendshipAction('Delete', Gdn::Session()->UserID, $Sender->RequestArgs[1]);
     }
   }
 
-  public function ProfileController_BeforeStatusForm_Handler($Sender) {
-    echo "HI!";
+  public function ProfileController_BeforeRenderAsset_Handler($Sender, $Args) {
+    if($Args['AssetName'] == 'Content') {
+      //var_dump($this->_FriendshipModel->Get(1,2));
+    }
   }
+
+  public function ProfileController_BeforeStatusForm_Handler($Sender) {}
    
   public function Setup() {
     Gdn::Structure()
@@ -112,20 +127,23 @@ class FriendshipsPlugin extends Gdn_Plugin {
       ->Column('RequestedOn', 'datetime')
       ->Column('Accepted', 'datetime', TRUE) //can be null
       ->Set(FALSE, FALSE);
-
+    /* unused due to vanilla bug https://github.com/vanillaforums/Garden/issues/1631
     foreach ($this->_UrlMapping as $Short => $Real) {
       if(!Gdn::Router()->MatchRoute($Short))  {
         Gdn::Router()->SetRoute($Short, $Real, 'Internal');
       }
     }
+    */
   }
 
   public function OnDisable() {
+    /* unused due to vanilla bug https://github.com/vanillaforums/Garden/issues/1631
     foreach ($this->_UrlMapping as $Short => $Real) {
       if(Gdn::Router()->MatchRoute($Short)) {
         Gdn::Router()->DeleteRoute($Short);
       }
     }
+    */
   }
    
 }

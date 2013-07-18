@@ -40,7 +40,7 @@ class FriendshipModel extends Gdn_Model {
   * 
   * @since 0.1
   * @access public
-  * @return Object Friendship
+  * @return Object Friendship objects
   */
   public function Get($AUserID, $BUserID) {
     //remove the oldest (if two are present)
@@ -49,10 +49,7 @@ class FriendshipModel extends Gdn_Model {
                             ->Where(array('f.RequestedBy' => $AUserID, 'f.RequestedTo' => $BUserID))
                             ->OrWhere(array('f.RequestedBy' => $BUserID, 'f.RequestedTo' => $AUserID))
                             ->Get()
-                            ->Result();
-    //echo "<pre>";
-    //var_dump($Friendship);
-    //exit();
+                            ->FirstRow();
     return $Friendship;
   }
 
@@ -68,7 +65,7 @@ class FriendshipModel extends Gdn_Model {
                             ->From('Friendship f')
                             ->Where(array('f.RequestedBy' => $AUserID, 'f.RequestedTo' => $BUserID))
                             ->Get()
-                            ->Result();
+                            ->FirstRow();
     return $Friendship;
   }
 
@@ -125,12 +122,26 @@ class FriendshipModel extends Gdn_Model {
   }
 
   /**
-  * 
+  * Delete request or complete friendships
   * 
   * @since 0.1
   * @access public
   */
   public function Delete($AUserID, $BUserID) {
+    //Delete A->B
+    $this->SQL->Delete('Friendship',
+      array('RequestedBy' => $AUserID, 
+            'RequestedTo' => $BUserID
+            )
+    );
+    //Delete B->A
+    /* if enabled a user can delete also friendships requesto to him
+    $this->SQL->Delete('Friendship',
+      array('RequestedBy' => $BUserID, 
+            'RequestedTo' => $AUserID
+            )
+    );
+    */
   }
 
   /**
@@ -139,7 +150,13 @@ class FriendshipModel extends Gdn_Model {
   * @since 0.1
   * @access public
   */
-  public function RequestFriendship($AUserID, $BUserID) {
+  public function Request($AUserID, $BUserID) {
+    $this->SQL->Insert('Friendship', 
+      array('RequestedBy' => $AUserID, 
+            'RequestedTo' => $BUserID,
+            'RequestedOn' => Gdn_Format::ToDateTime()
+            )
+    );
   }
 
   /**
@@ -148,7 +165,7 @@ class FriendshipModel extends Gdn_Model {
   * @since 0.1
   * @access public
   */
-  public function ConfirmFriendship($AUserID, $BUserID) {
+  public function Confirm($AUserID, $BUserID) {
   }
 
 }

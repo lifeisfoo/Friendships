@@ -22,7 +22,7 @@ class FriendshipsModule extends Gdn_Module {
 
 	private function _RequestLink($UserID) {
 		$Return = '';
-		$Return .= '<a class="Friendship RequestFriendship" href="' . Url("/RequestFriendship/".$UserID) . '">';
+		$Return .= '<a class="Friendship RequestFriendship" href="' . Url("/plugin/Friendships/RequestFriendship/".$UserID) . '">';
 		$Return .= T('Request friendship');
 		$Return .= '</a>';
 		return $Return;
@@ -30,7 +30,7 @@ class FriendshipsModule extends Gdn_Module {
 
 	private function _ConfirmLinkWhitName($Friendship) {
 		$Return = '';
-		$Return .= '<a class="Friendship ConfirmFriendship" href="' . Url("/ConfirmFriendship/".$Friendship->RequestedBy) . '">';
+		$Return .= '<a class="Friendship ConfirmFriendship" href="' . Url("/plugin/Friendships/ConfirmFriendship/".$Friendship->RequestedBy) . '">';
 		$Return .= sprintf(T('Confirm %1$s friendship'), $Friendship->RequestedByName);
 		$Return .= '</a>';
 		return $Return;
@@ -38,7 +38,7 @@ class FriendshipsModule extends Gdn_Module {
 
 	private function _ConfirmLink($UserID) {
 		$Return = '';
-		$Return .= '<a class="Friendship ConfirmFriendship" href="' . Url("/ConfirmFriendship/".$UserID) . '">';
+		$Return .= '<a class="Friendship ConfirmFriendship" href="' . Url("/plugin/Friendships/ConfirmFriendship/".$UserID) . '">';
 		$Return .= T('Confirm friendship');
 		$Return .= '</a>';
 		return $Return;
@@ -46,7 +46,7 @@ class FriendshipsModule extends Gdn_Module {
 
 	private function _DeleteLink($UserID, $Text) {
 		$Return = '';
-		$Return .= '<a class="Friendship DeleteFriendship" href="' . Url("/DeleteFriendship/". $UserID) . '">';
+		$Return .= '<a class="Friendship DeleteFriendship" href="' . Url("/plugin/Friendships/DeleteFriendship/". $UserID) . '">';
 		$Return .= T($Text);
 		$Return .= '</a>';
 		return $Return;
