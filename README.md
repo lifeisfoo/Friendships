@@ -51,6 +51,16 @@ Just define these strings in your main vanilla's localization file /locales/your
 'Delete friendship'
 
 'Delete friendship request'
+
+'Friendship request sent'
+
+'Error during friendship request'
+
+'Friendships requested'
+
+'Error during friendship request'
+
+'Error during friendship request. Please reload the page'
 ```
 
 ##Sponsor

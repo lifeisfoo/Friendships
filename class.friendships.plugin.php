@@ -88,11 +88,15 @@ class FriendshipsPlugin extends Gdn_Plugin {
   }
   
   public function Base_Render_Before($Sender) {
+    $Sender->AddJsFile('friendships.js', 'plugins' . DS . 'Friendships');
     $Module = new FriendshipsModule($Sender);
     $Sender->AddModule($Module);
   }
 
   public function PluginController_Friendships_Create($Sender) {
+    //echo "<pre>";
+    //print_r($Sender);
+    //exit();
     $this->Dispatch($Sender, $Sender->RequestArgs);
   }
 
@@ -123,7 +127,14 @@ class FriendshipsPlugin extends Gdn_Plugin {
         );
         $Email->Send();
       }
-      Redirect($RedirectUrl);
+      if($Sender->DeliveryMethod() == 'JSON') {
+        $Sender->DeliveryType(DELIVERY_TYPE_DATA);
+        $Sender->SetData('FriendshipRequested', TRUE);
+        $Sender->SetData('Message', T('Friendship request sent'));
+        $Sender->Render();
+      }else {
+        Redirect($RedirectUrl);
+      }
     }
   }
 
