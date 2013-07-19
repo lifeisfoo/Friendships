@@ -67,13 +67,23 @@ class FriendshipsPlugin extends Gdn_Plugin {
     }
   }
 
-  private function _FriendshipAction($Action, $FromUser, $ToUser){
+  private function _FriendshipAction($Action, $FromUser, $ToUser, $Redirect = TRUE){
     if($FromUser && $ToUser) {
       $this->_FriendshipModel->$Action($FromUser, $ToUser);
       $UserTo = $this->_UserModel->GetID($ToUser);
-      Redirect('/profile/' . $this->_ProfileUrl($UserTo->Name, $ToUser));
+      $RedirectUrl = '/profile/' . $this->_ProfileUrl($UserTo->Name, $ToUser);
+      if($Redirect) {
+        Redirect($RedirectUrl);
+      }else{
+        return $RedirectUrl;
+      }
     }else{
-      Redirect('/');
+      $RedirectUrl = '/';
+      if($Redirect) {
+        Redirect($RedirectUrl);
+      }else{
+        return $RedirectUrl;
+      }
     }
   }
   
@@ -93,24 +103,28 @@ class FriendshipsPlugin extends Gdn_Plugin {
   public function Controller_RequestFriendship($Sender) {
     //The first check is only for pedantic security, since guests can only have View Permission
     if(Gdn::Session()->IsValid() && CheckPermission('Friendships.Friends.RequestFriendship')){
-      $this->_FriendshipAction('Request', Gdn::Session()->UserID, $Sender->RequestArgs[1]);
-      $User = $this->_UserModel->GetID($Sender->RequestArgs[1]);
-      $Email = new Gdn_Email();
-      $Email->Subject(sprintf(T('[%1$s] %2$s wants to be your friend', C('Garden.Title'), $User->Name)));
-      $Email->To($User->Email);
-      $Email->Message(
-        sprintf(
-           T('Hi %1$s,
+      $RedirectUrl = $this->_FriendshipAction('Request', Gdn::Session()->UserID, $Sender->RequestArgs[1], FALSE);
+      if($RedirectUrl != '/'){
+        $User = $this->_UserModel->GetID($Sender->RequestArgs[1]);
+        $Email = new Gdn_Email();
+        $Email->Subject(sprintf(T('[%1$s] %2$s wants to be your friend', C('Garden.Title'), $User->Name)));
+        $Email->To($User->Email);
+        $Email->Message(
+          sprintf(
+             T('Hi %1$s,
 
-%2$s wants to be your friend. Visit your profile page to confirm this friendship request:
+  %2$s wants to be your friend. Visit your profile page to confirm this friendship request:
 
-%3$s'),
-           Gdn::Session()->User->Name,
-           $User->Name,
-           ExternalUrl('/profile' . $this->_ProfileUrl(Gdn::Session()->User->Name, Gdn::Session()->UserID))
-        )
-      );
-      $Email->Send();
+  %3$s'),
+             Gdn::Session()->User->Name,
+             $User->Name,
+             ExternalUrl('/profile/' . $this->_ProfileUrl($User->Name, $User->UserID))
+          )
+        );
+        $Email->Send();
+        $Sender->InformMessage('TEST message');
+      }
+      Redirect($RedirectUrl);
     }
   }
 
