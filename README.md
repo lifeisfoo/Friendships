@@ -11,7 +11,7 @@ Other plugins can be developed using this plugin data (e.g. "Show Friends Post",
 Requires Vanilla >= 2.0.18.4
 
 ##Customization
-In order to properly display users without avatar you need to create a ```/conf/bootstrap.before.php``` file in your vanilla installation directory and define a function inside it.
+In order to properly display users without avatar you need to create a ```/conf/bootstrap.before.php``` file (if not exists yet) in your vanilla installation directory and define a function inside it.
 
 ```php
 if (!function_exists('UserPhotoDefaultUrl')) {
@@ -22,6 +22,36 @@ function UserPhotoDefaultUrl($User){
 ``` 
 
 Vanilla will reuse this function every time an user don't have an avatar.
+
+
+##Translation
+Just define these strings in your main vanilla's localization file /locales/yourlang/definitions.php
+
+```
+'[%1$s] %2$s wants to be your friend'
+
+'Hi %1$s,
+
+%2$s wants to be your friend. Visit your profile page to confirm this friendship request:
+
+%3$s'
+
+'Request friendship'
+
+'Confirm %1$s friendship'
+
+'Confirm friendship'
+
+'Friends list'
+
+'Pending requests'
+
+'Friendships'
+
+'Delete friendship'
+
+'Delete friendship request'
+```
 
 ##Sponsor
 Thanks to [szarak](http://vanillaforums.org/profile/45649/szarak) for making this happen.
