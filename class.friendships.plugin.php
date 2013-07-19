@@ -116,9 +116,9 @@ class FriendshipsPlugin extends Gdn_Plugin {
   %2$s wants to be your friend. Visit your profile page to confirm this friendship request:
 
   %3$s'),
-             Gdn::Session()->User->Name,
              $User->Name,
-             ExternalUrl('/profile/' . $this->_ProfileUrl($User->Name, $User->UserID))
+             Gdn::Session()->User->Name,
+             ExternalUrl('/profile/' . $this->_ProfileUrl(Gdn::Session()->User->Name, Gdn::Session()->UserID))
           )
         );
         $Email->Send();
