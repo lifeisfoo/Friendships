@@ -49,13 +49,16 @@ class FriendshipsModule extends Gdn_Module {
 	}
 
 	private function _FriendsList($UserID) {
-		$Return .= '<h5>' . T('Friends list') . '</h5>';
-		$Return .= '<div class="Avatars">';
 		$Friends = $this->_FriendshipModel->Friends($UserID);
-		foreach ($Friends as $Friend) {
-			$Return .= UserPhoto($Friend);
+		$Return = '';
+		if(sizeof($Friends) > 0) {
+			$Return .= '<h5>' . T('Friends list') . '</h5>';
+			$Return .= '<div class="Avatars">';
+			foreach ($Friends as $Friend) {
+				$Return .= UserPhoto($Friend);
+			}
+			$Return .= '</div>';
 		}
-		$Return .= '</div>';
 		return $Return;
 	}
 
