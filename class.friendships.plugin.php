@@ -122,7 +122,6 @@ class FriendshipsPlugin extends Gdn_Plugin {
           )
         );
         $Email->Send();
-        $Sender->InformMessage('TEST message');
       }
       Redirect($RedirectUrl);
     }
