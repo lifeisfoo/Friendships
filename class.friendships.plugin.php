@@ -38,6 +38,8 @@ $PluginInfo['Friendships'] = array(
   'AuthorUrl' => 'http://forkwait.net'
 );
 
+Gdn::FactoryInstall('FriendshipModel', 'FriendshipModel', __DIR__ . DS . 'models', Gdn::FactoryInstance);
+
 class FriendshipsPlugin extends Gdn_Plugin {
 
   private $_UrlMapping = array(
