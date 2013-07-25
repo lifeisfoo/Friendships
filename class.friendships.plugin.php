@@ -86,7 +86,7 @@ class FriendshipsPlugin extends Gdn_Plugin {
       }
     }
   }
-  
+
   public function Base_Render_Before($Sender) {
     $Sender->AddJsFile('friendships.js', 'plugins' . DS . 'Friendships');
     $Module = new FriendshipsModule($Sender);
@@ -94,9 +94,6 @@ class FriendshipsPlugin extends Gdn_Plugin {
   }
 
   public function PluginController_Friendships_Create($Sender) {
-    //echo "<pre>";
-    //print_r($Sender);
-    //exit();
     $this->Dispatch($Sender, $Sender->RequestArgs);
   }
 
@@ -155,8 +152,6 @@ class FriendshipsPlugin extends Gdn_Plugin {
   public function ProfileController_BeforeRenderAsset_Handler($Sender, $Args) {
     if($Args['AssetName'] == 'Content') {}
   }
-
-  public function ProfileController_BeforeStatusForm_Handler($Sender) {}
    
   public function Setup() {
     Gdn::Structure()
