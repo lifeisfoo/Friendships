@@ -94,46 +94,60 @@ class FriendshipsModule extends Gdn_Module {
 
 
 	public function ToString() {
+		if(!CheckPermission('Friendships.Friends.View')){
+			return '';
+		}
+
 		if($this->_Sender instanceof ProfileController) {
-			if(CheckPermission('Friendships.Friends.View')){
-				$ProfileOwnerID = $this->_Sender->User->UserID;
-				$String = '<div class="Box FriendshipsBox">';
-				$String .= '<h4>' . T('Friendships') . '</h4>';
-				if(Gdn::Session()->IsValid()){ //a logged user
-					$SessionUserID = Gdn::Session()->UserID;
-					//check if current user is on his page -> shows only his friend
-					if($ProfileOwnerID == $SessionUserID){
-						//this is my profile page (AND obviously I'm NOT a guest)
-						$String .= $this->_ReceivedFriendshipRequests();
-					}else{
-						//this is NOT my profile page
-						//Check if a friendship exists or a friendship request exist: 'request' or 'confirm'
-						if($this->_FriendshipModel->FriendsFrom($SessionUserID, $ProfileOwnerID)){
-							if(CheckPermission('Friendships.Friends.DeleteFriendship')){
-								$String .= $this->_DeleteFriendshipButton($ProfileOwnerID);
-							}	
-						}elseif($this->_FriendshipModel->Get($SessionUserID, $ProfileOwnerID)){
-							$Out = $this->_FriendshipModel->GetAbsolute($SessionUserID, $ProfileOwnerID);
-							$In = $this->_FriendshipModel->GetAbsolute($ProfileOwnerID, $SessionUserID);
-							if($Out){ //is a friendship request from me
-								$String .= $this->_DeleteFriendshipRequestButton($Out->RequestedTo);
-							}else{ //is an incoming friendship request
-								$String .= $this->_ConfirmFriendshipButton($In->RequestedBy);
-							}
-						}else{ //show the "Request friendship" button
-							if(CheckPermission('Friendships.Friends.RequestFriendship')){
-								$String .= $this->_RequestFriendshipButton($ProfileOwnerID);
-							}
-						}
-					}
-					$String .= $this->_FriendsList($ProfileOwnerID);
-				}else{//I'm guest -> I can have only view permission (internal vanilla security rule)
-					//show friends list
-					$String .= $this->_FriendsList($ProfileOwnerID);
-				}	
+			$ProfileOwnerID = $this->_Sender->User->UserID;
+		}else{
+			$ProfileOwnerID = Gdn::Session()->UserID;
+		}
+
+		$String = '<div class="Box FriendshipsBox">';
+		$String .= '<h4>' . T('Friendships') . '</h4>';
+		
+		//I'm guest -> I can have only view permission (internal vanilla security rule)
+		if(!Gdn::Session()->IsValid()){
+			if($this->_Sender instanceof ProfileController) {
+				//show friends list of profile user
+				$String .= $this->_FriendsList($ProfileOwnerID);	 
 				$String .= '</div>';
 				return $String;
+			}else{
+				//show nothing if not in profile
+				return '';
 			}
 		}
+		
+		$SessionUserID = Gdn::Session()->UserID;
+		//check if current user is on his page -> shows only his friend
+		if($ProfileOwnerID == $SessionUserID){
+			//this is my profile page
+			$String .= $this->_ReceivedFriendshipRequests();
+		}else{
+			//this is NOT my profile page, but must be a profile page
+			//Check if a friendship exists or a friendship request exist: 'request' or 'confirm'
+			if($this->_FriendshipModel->FriendsFrom($SessionUserID, $ProfileOwnerID)){
+				if(CheckPermission('Friendships.Friends.DeleteFriendship')){
+					$String .= $this->_DeleteFriendshipButton($ProfileOwnerID);
+				}
+			}elseif($this->_FriendshipModel->Get($SessionUserID, $ProfileOwnerID)){
+				$Out = $this->_FriendshipModel->GetAbsolute($SessionUserID, $ProfileOwnerID);
+				$In = $this->_FriendshipModel->GetAbsolute($ProfileOwnerID, $SessionUserID);
+				if($Out){ //is a friendship request from me
+					$String .= $this->_DeleteFriendshipRequestButton($Out->RequestedTo);
+				}else{ //is an incoming friendship request
+					$String .= $this->_ConfirmFriendshipButton($In->RequestedBy);
+				}
+			}else{ //show the "Request friendship" button
+				if(CheckPermission('Friendships.Friends.RequestFriendship')){
+					$String .= $this->_RequestFriendshipButton($ProfileOwnerID);
+				}
+			}
+		}
+		$String .= $this->_FriendsList($ProfileOwnerID);
+		$String .= '</div>';
+		return $String;
 	}
 }
