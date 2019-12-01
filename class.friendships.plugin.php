@@ -104,7 +104,7 @@ class FriendshipsPlugin extends Gdn_Plugin {
              ExternalUrl('/profile/' . $this->_ProfileUrl(Gdn::Session()->User->Name, Gdn::Session()->UserID))
           )
         );
-        $Email->Send();
+        // $Email->Send();
       }
       if($Sender->DeliveryMethod() == 'JSON') {
         $Sender->DeliveryType(DELIVERY_TYPE_DATA);
@@ -136,13 +136,7 @@ class FriendshipsPlugin extends Gdn_Plugin {
   }
    
   public function Setup() {
-    Gdn::Structure()
-      ->Table('Friendship')
-      ->Column('RequestedBy', 'int(11)', FALSE, 'primary')
-      ->Column('RequestedTo', 'int(11)', FALSE, 'primary')
-      ->Column('RequestedOn', 'datetime')
-      ->Column('Accepted', 'datetime', TRUE) //can be null
-      ->Set(FALSE, FALSE);
+    $this->Structure();
     /* unused due to vanilla bug https://github.com/vanillaforums/Garden/issues/1631
     foreach ($this->_UrlMapping as $Short => $Real) {
       if(!Gdn::Router()->MatchRoute($Short))  {
@@ -150,6 +144,16 @@ class FriendshipsPlugin extends Gdn_Plugin {
       }
     }
     */
+  }
+
+  public function Structure() {
+    Gdn::Structure()
+      ->Table('Friendship')
+      ->Column('RequestedBy', 'int(11)', FALSE, 'primary')
+      ->Column('RequestedTo', 'int(11)', FALSE, 'primary')
+      ->Column('RequestedOn', 'datetime')
+      ->Column('Accepted', 'datetime', TRUE) //can be null
+      ->Set(FALSE, FALSE);
   }
 
   public function OnDisable() {
