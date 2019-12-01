@@ -18,26 +18,6 @@ along with Friendships. If not, see <http://www.gnu.org/licenses/>.
 
 */
 
-// Define the plugin:
-$PluginInfo['Friendships'] = array(
-  'Description' => 'Allows users to being "friends" (send, receive and accept "friendship requests")',
-  'Version' => '0.1',
-  'RequiredApplications' => array('Vanilla' => '2.0.18.4'),
-  'RegisterPermissions' => array(
-    'Friendships.Friends.View', 
-    'Friendships.Friends.RequestFriendship', 
-    'Friendships.Friends.DeleteFriendship'),
-  'RequiredTheme' => FALSE, 
-  'RequiredPlugins' => FALSE,
-  'HasLocale' => FALSE,
-  'MobileFriendly' => TRUE,
-  'SettingsUrl' => FALSE,//plugin/Friendships
-  'SettingsPermission' => 'Garden.AdminUser.Only',
-  'Author' => "Alessandro Miliucci",
-  'AuthorEmail' => 'lifeisfoo@gmail.com',
-  'AuthorUrl' => 'http://forkwait.net'
-);
-
 Gdn::FactoryInstall('FriendshipModel', 'FriendshipModel', __DIR__ . DS . 'models', Gdn::FactoryInstance);
 
 class FriendshipsPlugin extends Gdn_Plugin {

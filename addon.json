@@ -1,0 +1,26 @@
+{
+    "description": "Allows users to being \"friends\" (send, receive and accept \"friendship requests\")",
+    "version": "0.1",
+    "registerPermissions": [
+        "Friendships.Friends.View",
+        "Friendships.Friends.RequestFriendship",
+        "Friendships.Friends.DeleteFriendship"
+    ],
+    "requiredTheme": false,
+    "hasLocale": false,
+    "mobileFriendly": true,
+    "settingsUrl": false,
+    "settingsPermission": "Garden.AdminUser.Only",
+    "key": "friendships",
+    "type": "addon",
+    "authors": [
+        {
+            "name": "Alessandro Miliucci",
+            "email": "lifeisfoo@gmail.com",
+            "homepage": "http://forkwait.net"
+        }
+    ],
+    "require": {
+        "vanilla": ">=2.0.18.4"
+    }
+}
