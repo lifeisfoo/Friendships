@@ -8,7 +8,7 @@ Other plugins can be developed using this plugin data (e.g. "Show Friends Post",
 * Display "Send friendship request" button on every user's profile page
 * Send an email when a friendship is requested
 
-Requires Vanilla >= 2.0.18.4
+Requires Vanilla >= 3.2
 
 ##Customization
 In order to properly display users without avatar you need to create a ```/conf/bootstrap.before.php``` file (if not exists yet) in your vanilla installation directory and define a function inside it.
