@@ -17,11 +17,11 @@ class FriendshipsModule extends Gdn_Module {
 	}
 
 	private function _RequestLink($UserID) {
-		$Return = '';
-		$Return .= '<a class="Button Friendship RequestFriendship" href="' . Url("/plugin/Friendships/RequestFriendship/".$UserID) . '">';
-		$Return .= T('Request friendship');
-		$Return .= '</a>';
-		return $Return;
+		return Anchor(
+			Gdn::Translate('Request friendship'),
+			"/plugin/Friendships/RequestFriendship/".$UserID,
+			"Button Friendship RequestFriendship Hijack"
+		);
 	}
 
 	private function _ConfirmLinkWhitName($Friendship) {
@@ -41,11 +41,11 @@ class FriendshipsModule extends Gdn_Module {
 	}
 
 	private function _DeleteLink($UserID, $Text) {
-		$Return = '';
-		$Return .= '<a class="Button Friendship DeleteFriendship" href="' . Url("/plugin/Friendships/DeleteFriendship/". $UserID) . '">';
-		$Return .= T($Text);
-		$Return .= '</a>';
-		return $Return;
+		return Anchor(
+			Gdn::Translate($Text),
+			"/plugin/Friendships/DeleteFriendship/".$UserID,
+			"Button Friendship DeleteFriendship Hijack"
+		);
 	}
 
 	private function _FriendsList($UserID) {
@@ -76,7 +76,7 @@ class FriendshipsModule extends Gdn_Module {
 		return $Return;
 	}
 
-	private function _RequestFriendshipButton($UserID) {
+	public function RequestFriendshipButton($UserID) {
 		return $this->_RequestLink($UserID);
 	}
 
@@ -84,7 +84,7 @@ class FriendshipsModule extends Gdn_Module {
 		return $this->_DeleteLink($UserID, 'Delete friendship');
 	}
 
-	private function _DeleteFriendshipRequestButton($UserID) {
+	public function DeleteFriendshipRequestButton($UserID) {
 		return $this->_DeleteLink($UserID, 'Delete friendship request');
 	}
 
@@ -122,7 +122,7 @@ class FriendshipsModule extends Gdn_Module {
 							}
 						}else{ //show the "Request friendship" button
 							if(CheckPermission('Friendships.Friends.RequestFriendship')){
-								$String .= $this->_RequestFriendshipButton($ProfileOwnerID);
+								$String .= $this->RequestFriendshipButton($ProfileOwnerID);
 							}
 						}
 					}
