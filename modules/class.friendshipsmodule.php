@@ -116,7 +116,7 @@ class FriendshipsModule extends Gdn_Module {
 							$Out = $this->_FriendshipModel->GetAbsolute($SessionUserID, $ProfileOwnerID);
 							$In = $this->_FriendshipModel->GetAbsolute($ProfileOwnerID, $SessionUserID);
 							if($Out){ //is a friendship request from me
-								$String .= $this->_DeleteFriendshipRequestButton($Out->RequestedTo);
+								$String .= $this->DeleteFriendshipRequestButton($Out->RequestedTo);
 							}else{ //is an incoming friendship request
 								$String .= $this->_ConfirmFriendshipButton($In->RequestedBy);
 							}
