@@ -123,8 +123,20 @@ class FriendshipsPlugin extends Gdn_Plugin {
   //dispatched from http://www.yourforum.com/plugin/Friendships/ConfirmFriendship
   public function Controller_ConfirmFriendship($Sender) {
     if(Gdn::Session()->IsValid()){
-      $this->_FriendshipAction('Confirm', $Sender->RequestArgs[1], Gdn::Session()->UserID);
+      $this->_FriendshipAction('Confirm', $Sender->RequestArgs[1], Gdn::Session()->UserID, FALSE);
     }
+    $Sender->InformMessage(Gdn::Translate('Friendship confirmed'));
+    if(is_numeric($Sender->RequestArgs[2] ?? false)){
+      $FriendsListUserID = $Sender->RequestArgs[2];
+    }else{
+      $FriendsListUserID = $Sender->RequestArgs[1];
+    }
+    $Sender->JsonTarget(
+      ".Button.ConfirmFriendship",
+      (new FriendshipsModule)->FriendsList($FriendsListUserID),
+      'ReplaceWith'
+    );
+    $Sender->Render('Blank', 'Utility', 'Dashboard');
   }
 
   //dispatched from http://www.yourforum.com/plugin/Friendships/DeleteFriendship

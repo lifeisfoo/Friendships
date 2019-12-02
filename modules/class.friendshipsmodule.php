@@ -25,19 +25,19 @@ class FriendshipsModule extends Gdn_Module {
 	}
 
 	private function _ConfirmLinkWhitName($Friendship) {
-		$Return = '';
-		$Return .= '<a class="Button Friendship ConfirmFriendshipName" href="' . Url("/plugin/Friendships/ConfirmFriendship/".$Friendship->RequestedBy) . '">';
-		$Return .= sprintf(T('Confirm %1$s friendship'), $Friendship->RequestedByName);
-		$Return .= '</a>';
-		return $Return;
+		return Anchor(
+			sprintf(Gdn::Translate('Confirm %1$s friendship'), $Friendship->RequestedByName),
+			"/plugin/Friendships/ConfirmFriendship/".$Friendship->RequestedBy."/".$Friendship->RequestedTo,
+			"Button Friendship ConfirmFriendship Hijack"
+		);
 	}
 
 	private function _ConfirmLink($UserID) {
-		$Return = '';
-		$Return .= '<a class="Button Friendship ConfirmFriendship" href="' . Url("/plugin/Friendships/ConfirmFriendship/".$UserID) . '">';
-		$Return .= T('Confirm friendship');
-		$Return .= '</a>';
-		return $Return;
+		return Anchor(
+			Gdn::Translate('Confirm friendship'),
+			"/plugin/Friendships/ConfirmFriendship/".$UserID,
+			"Button Friendship ConfirmFriendship Hijack"
+		);
 	}
 
 	private function _DeleteLink($UserID, $Text) {
@@ -48,7 +48,7 @@ class FriendshipsModule extends Gdn_Module {
 		);
 	}
 
-	private function _FriendsList($UserID) {
+	public function FriendsList($UserID) {
 		$Friends = $this->_FriendshipModel->Friends($UserID);
 		$Return = '';
 		if(sizeof($Friends) > 0) {
@@ -126,10 +126,10 @@ class FriendshipsModule extends Gdn_Module {
 							}
 						}
 					}
-					$String .= $this->_FriendsList($ProfileOwnerID);
+					$String .= $this->FriendsList($ProfileOwnerID);
 				}else{//I'm guest -> I can have only view permission (internal vanilla security rule)
 					//show friends list
-					$String .= $this->_FriendsList($ProfileOwnerID);
+					$String .= $this->FriendsList($ProfileOwnerID);
 				}	
 				$String .= '</div>';
 				return $String;
