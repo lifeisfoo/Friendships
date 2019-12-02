@@ -17,47 +17,47 @@ class FriendshipsModule extends Gdn_Module {
 	}
 
 	private function _RequestLink($UserID) {
-		$Return = '';
-		$Return .= '<a class="Button Friendship RequestFriendship" href="' . Url("/plugin/Friendships/RequestFriendship/".$UserID) . '">';
-		$Return .= T('Request friendship');
-		$Return .= '</a>';
-		return $Return;
+		return Anchor(
+			Gdn::Translate('Request friendship'),
+			"/plugin/Friendships/RequestFriendship/".$UserID,
+			"Button Friendship RequestFriendship Hijack"
+		);
 	}
 
 	private function _ConfirmLinkWhitName($Friendship) {
-		$Return = '';
-		$Return .= '<a class="Button Friendship ConfirmFriendshipName" href="' . Url("/plugin/Friendships/ConfirmFriendship/".$Friendship->RequestedBy) . '">';
-		$Return .= sprintf(T('Confirm %1$s friendship'), $Friendship->RequestedByName);
-		$Return .= '</a>';
-		return $Return;
+		return Anchor(
+			sprintf(Gdn::Translate('Confirm %1$s friendship'), $Friendship->RequestedByName),
+			"/plugin/Friendships/ConfirmFriendship/".$Friendship->RequestedBy."/".$Friendship->RequestedTo,
+			"Button Friendship ConfirmFriendship Hijack"
+		);
 	}
 
 	private function _ConfirmLink($UserID) {
-		$Return = '';
-		$Return .= '<a class="Button Friendship ConfirmFriendship" href="' . Url("/plugin/Friendships/ConfirmFriendship/".$UserID) . '">';
-		$Return .= T('Confirm friendship');
-		$Return .= '</a>';
-		return $Return;
+		return Anchor(
+			Gdn::Translate('Confirm friendship'),
+			"/plugin/Friendships/ConfirmFriendship/".$UserID,
+			"Button Friendship ConfirmFriendship Hijack"
+		);
 	}
 
 	private function _DeleteLink($UserID, $Text) {
-		$Return = '';
-		$Return .= '<a class="Button Friendship DeleteFriendship" href="' . Url("/plugin/Friendships/DeleteFriendship/". $UserID) . '">';
-		$Return .= T($Text);
-		$Return .= '</a>';
-		return $Return;
+		return Anchor(
+			Gdn::Translate($Text),
+			"/plugin/Friendships/DeleteFriendship/".$UserID,
+			"Button Friendship DeleteFriendship Hijack"
+		);
 	}
 
-	private function _FriendsList($UserID) {
+	public function FriendsList($UserID) {
 		$Friends = $this->_FriendshipModel->Friends($UserID);
 		$Return = '';
 		if(sizeof($Friends) > 0) {
-			$Return .= '<h5>' . T('Friends list') . '</h5>';
+			$Return .= '<div class="FriendsList"><h5>' . T('Friends list') . '</h5>';
 			$Return .= '<div class="Avatars">';
 			foreach ($Friends as $Friend) {
 				$Return .= UserPhoto($Friend);
 			}
-			$Return .= '</div>';
+			$Return .= '</div></div>';
 		}
 		return $Return;
 	}
@@ -76,7 +76,7 @@ class FriendshipsModule extends Gdn_Module {
 		return $Return;
 	}
 
-	private function _RequestFriendshipButton($UserID) {
+	public function RequestFriendshipButton($UserID) {
 		return $this->_RequestLink($UserID);
 	}
 
@@ -84,7 +84,7 @@ class FriendshipsModule extends Gdn_Module {
 		return $this->_DeleteLink($UserID, 'Delete friendship');
 	}
 
-	private function _DeleteFriendshipRequestButton($UserID) {
+	public function DeleteFriendshipRequestButton($UserID) {
 		return $this->_DeleteLink($UserID, 'Delete friendship request');
 	}
 
@@ -95,7 +95,7 @@ class FriendshipsModule extends Gdn_Module {
 
 	public function ToString() {
 		if($this->_Sender instanceof ProfileController) {
-			if(CheckPermission('Friendships.Friends.View')){
+			if(CheckPermission('Plugins.Friendships.View')){
 				$ProfileOwnerID = $this->_Sender->User->UserID;
 				$String = '<div class="Box FriendshipsBox">';
 				$String .= '<h4>' . T('Friendships') . '</h4>';
@@ -109,28 +109,28 @@ class FriendshipsModule extends Gdn_Module {
 						//this is NOT my profile page
 						//Check if a friendship exists or a friendship request exist: 'request' or 'confirm'
 						if($this->_FriendshipModel->FriendsFrom($SessionUserID, $ProfileOwnerID)){
-							if(CheckPermission('Friendships.Friends.DeleteFriendship')){
+							if(CheckPermission('Plugins.Friendships.Delete')){
 								$String .= $this->_DeleteFriendshipButton($ProfileOwnerID);
-							}	
+							}
 						}elseif($this->_FriendshipModel->Get($SessionUserID, $ProfileOwnerID)){
 							$Out = $this->_FriendshipModel->GetAbsolute($SessionUserID, $ProfileOwnerID);
 							$In = $this->_FriendshipModel->GetAbsolute($ProfileOwnerID, $SessionUserID);
 							if($Out){ //is a friendship request from me
-								$String .= $this->_DeleteFriendshipRequestButton($Out->RequestedTo);
+								$String .= $this->DeleteFriendshipRequestButton($Out->RequestedTo);
 							}else{ //is an incoming friendship request
 								$String .= $this->_ConfirmFriendshipButton($In->RequestedBy);
 							}
 						}else{ //show the "Request friendship" button
-							if(CheckPermission('Friendships.Friends.RequestFriendship')){
-								$String .= $this->_RequestFriendshipButton($ProfileOwnerID);
+							if(CheckPermission('Plugins.Friendships.Add')){
+								$String .= $this->RequestFriendshipButton($ProfileOwnerID);
 							}
 						}
 					}
-					$String .= $this->_FriendsList($ProfileOwnerID);
+					$String .= $this->FriendsList($ProfileOwnerID);
 				}else{//I'm guest -> I can have only view permission (internal vanilla security rule)
 					//show friends list
-					$String .= $this->_FriendsList($ProfileOwnerID);
-				}	
+					$String .= $this->FriendsList($ProfileOwnerID);
+				}
 				$String .= '</div>';
 				return $String;
 			}

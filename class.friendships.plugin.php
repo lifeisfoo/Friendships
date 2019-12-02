@@ -18,26 +18,6 @@ along with Friendships. If not, see <http://www.gnu.org/licenses/>.
 
 */
 
-// Define the plugin:
-$PluginInfo['Friendships'] = array(
-  'Description' => 'Allows users to being "friends" (send, receive and accept "friendship requests")',
-  'Version' => '0.1',
-  'RequiredApplications' => array('Vanilla' => '2.0.18.4'),
-  'RegisterPermissions' => array(
-    'Friendships.Friends.View', 
-    'Friendships.Friends.RequestFriendship', 
-    'Friendships.Friends.DeleteFriendship'),
-  'RequiredTheme' => FALSE, 
-  'RequiredPlugins' => FALSE,
-  'HasLocale' => FALSE,
-  'MobileFriendly' => TRUE,
-  'SettingsUrl' => FALSE,//plugin/Friendships
-  'SettingsPermission' => 'Garden.AdminUser.Only',
-  'Author' => "Alessandro Miliucci",
-  'AuthorEmail' => 'lifeisfoo@gmail.com',
-  'AuthorUrl' => 'http://forkwait.net'
-);
-
 Gdn::FactoryInstall('FriendshipModel', 'FriendshipModel', __DIR__ . DS . 'models', Gdn::FactoryInstance);
 
 class FriendshipsPlugin extends Gdn_Plugin {
@@ -90,7 +70,7 @@ class FriendshipsPlugin extends Gdn_Plugin {
   }
 
   public function Base_Render_Before($Sender) {
-    $Sender->AddJsFile('friendships.js', 'plugins' . DS . 'Friendships');
+    // $Sender->AddJsFile('friendships.js', 'plugins' . DS . 'Friendships');
     $Module = new FriendshipsModule($Sender);
     $Sender->AddModule($Module);
   }
@@ -105,7 +85,7 @@ class FriendshipsPlugin extends Gdn_Plugin {
   //dispatched from http://www.yourforum.com/plugin/Friendships/RequestFriendship
   public function Controller_RequestFriendship($Sender) {
     //The first check is only for pedantic security, since guests can only have View Permission
-    if(Gdn::Session()->IsValid() && CheckPermission('Friendships.Friends.RequestFriendship')){
+    if(Gdn::Session()->IsValid() && CheckPermission('Plugins.Friendships.Add')){
       $RedirectUrl = $this->_FriendshipAction('Request', Gdn::Session()->UserID, $Sender->RequestArgs[1], FALSE);
       if($RedirectUrl != '/'){
         $User = $this->_UserModel->GetID($Sender->RequestArgs[1]);
@@ -127,10 +107,13 @@ class FriendshipsPlugin extends Gdn_Plugin {
         $Email->Send();
       }
       if($Sender->DeliveryMethod() == 'JSON') {
-        $Sender->DeliveryType(DELIVERY_TYPE_DATA);
-        $Sender->SetData('FriendshipRequested', TRUE);
-        $Sender->SetData('Message', T('Friendship request sent'));
-        $Sender->Render();
+        $Sender->InformMessage(Gdn::Translate('Friendship request sent'));
+        $Sender->JsonTarget(
+          ".Button.RequestFriendship",
+          (new FriendshipsModule)->DeleteFriendshipRequestButton($User->UserID),
+          'ReplaceWith'
+        );
+        $Sender->Render('Blank', 'Utility', 'Dashboard');
       }else {
         Redirect($RedirectUrl);
       }
@@ -140,29 +123,32 @@ class FriendshipsPlugin extends Gdn_Plugin {
   //dispatched from http://www.yourforum.com/plugin/Friendships/ConfirmFriendship
   public function Controller_ConfirmFriendship($Sender) {
     if(Gdn::Session()->IsValid()){
-      $this->_FriendshipAction('Confirm', $Sender->RequestArgs[1], Gdn::Session()->UserID);
+      $this->_FriendshipAction('Confirm', $Sender->RequestArgs[1], Gdn::Session()->UserID, FALSE);
     }
+    $Sender->InformMessage(Gdn::Translate('Friendship confirmed'));
+    if(is_numeric($Sender->RequestArgs[2] ?? false)){
+      $User = $this->_UserModel->GetID($Sender->RequestArgs[2]);
+    }else{
+      $User = $this->_UserModel->GetID($Sender->RequestArgs[1]);
+    }
+    RedirectTo('/profile/'.$User->Name);
   }
 
   //dispatched from http://www.yourforum.com/plugin/Friendships/DeleteFriendship
   public function Controller_DeleteFriendship($Sender) {
-    if(Gdn::Session()->IsValid() && CheckPermission('Friendships.Friends.DeleteFriendship')){
-      $this->_FriendshipAction('Delete', Gdn::Session()->UserID, $Sender->RequestArgs[1]);
+    if(Gdn::Session()->IsValid() && CheckPermission('Plugins.Friendships.Delete')){
+      $this->_FriendshipAction('Delete', Gdn::Session()->UserID, $Sender->RequestArgs[1], FALSE);
     }
+    $User = $this->_UserModel->GetID($Sender->RequestArgs[1]);
+    RedirectTo('/profile/'.$User->Name);
   }
 
   public function ProfileController_BeforeRenderAsset_Handler($Sender, $Args) {
     if($Args['AssetName'] == 'Content') {}
   }
-   
+
   public function Setup() {
-    Gdn::Structure()
-      ->Table('Friendship')
-      ->Column('RequestedBy', 'int(11)', FALSE, 'primary')
-      ->Column('RequestedTo', 'int(11)', FALSE, 'primary')
-      ->Column('RequestedOn', 'datetime')
-      ->Column('Accepted', 'datetime', TRUE) //can be null
-      ->Set(FALSE, FALSE);
+    $this->Structure();
     /* unused due to vanilla bug https://github.com/vanillaforums/Garden/issues/1631
     foreach ($this->_UrlMapping as $Short => $Real) {
       if(!Gdn::Router()->MatchRoute($Short))  {
@@ -170,6 +156,16 @@ class FriendshipsPlugin extends Gdn_Plugin {
       }
     }
     */
+  }
+
+  public function Structure() {
+    Gdn::Structure()
+      ->Table('Friendship')
+      ->Column('RequestedBy', 'int(11)', FALSE, 'primary')
+      ->Column('RequestedTo', 'int(11)', FALSE, 'primary')
+      ->Column('RequestedOn', 'datetime')
+      ->Column('Accepted', 'datetime', TRUE) //can be null
+      ->Set(FALSE, FALSE);
   }
 
   public function OnDisable() {
@@ -181,5 +177,4 @@ class FriendshipsPlugin extends Gdn_Plugin {
     }
     */
   }
-   
 }
