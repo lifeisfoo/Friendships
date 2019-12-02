@@ -2,7 +2,7 @@
 This plugin allows users to being "friends" (send, receive and accept "friendship requests").
 Other plugins can be developed using this plugin data (e.g. "Show Friends Post", "Friends Activity", etc).
 
-##Features
+## Features
 
 * Display friends list in user's profile page
 * Display "Send friendship request" button on every user's profile page
@@ -10,7 +10,7 @@ Other plugins can be developed using this plugin data (e.g. "Show Friends Post",
 
 Requires Vanilla >= 3.2
 
-##Customization
+## Customization
 In order to properly display users without avatar you need to create a ```/conf/bootstrap.before.php``` file (if not exists yet) in your vanilla installation directory and define a function inside it.
 
 ```php
@@ -24,7 +24,7 @@ function UserPhotoDefaultUrl($User){
 Vanilla will reuse this function every time an user don't have an avatar.
 
 
-##Translation
+## Translation
 Just define these strings in your main vanilla's localization file /locales/yourlang/definitions.php
 
 ```
@@ -63,8 +63,8 @@ Just define these strings in your main vanilla's localization file /locales/your
 'Error during friendship request. Please reload the page'
 ```
 
-##Sponsor
+## Sponsor
 Thanks to [szarak](http://vanillaforums.org/profile/45649/szarak) for making this happen.
 
-##Author and License
+## Author and License
 Alessandro Miliucci, GPL v3. Icon by [VisualPharm](http://www.visualpharm.com/)
