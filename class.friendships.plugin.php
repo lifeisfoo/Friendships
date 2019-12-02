@@ -70,7 +70,7 @@ class FriendshipsPlugin extends Gdn_Plugin {
   }
 
   public function Base_Render_Before($Sender) {
-    $Sender->AddJsFile('friendships.js', 'plugins' . DS . 'Friendships');
+    // $Sender->AddJsFile('friendships.js', 'plugins' . DS . 'Friendships');
     $Module = new FriendshipsModule($Sender);
     $Sender->AddModule($Module);
   }
@@ -104,13 +104,16 @@ class FriendshipsPlugin extends Gdn_Plugin {
              ExternalUrl('/profile/' . $this->_ProfileUrl(Gdn::Session()->User->Name, Gdn::Session()->UserID))
           )
         );
-        // $Email->Send();
+        $Email->Send();
       }
       if($Sender->DeliveryMethod() == 'JSON') {
-        $Sender->DeliveryType(DELIVERY_TYPE_DATA);
-        $Sender->SetData('FriendshipRequested', TRUE);
-        $Sender->SetData('Message', T('Friendship request sent'));
-        $Sender->Render();
+        $Sender->InformMessage(Gdn::Translate('Friendship request sent'));
+        $Sender->JsonTarget(
+          ".Button.RequestFriendship",
+          (new FriendshipsModule)->DeleteFriendshipRequestButton($User->UserID),
+          'ReplaceWith'
+        );
+        $Sender->Render('Blank', 'Utility', 'Dashboard');
       }else {
         Redirect($RedirectUrl);
       }
@@ -127,8 +130,15 @@ class FriendshipsPlugin extends Gdn_Plugin {
   //dispatched from http://www.yourforum.com/plugin/Friendships/DeleteFriendship
   public function Controller_DeleteFriendship($Sender) {
     if(Gdn::Session()->IsValid() && CheckPermission('Friendships.Friends.DeleteFriendship')){
-      $this->_FriendshipAction('Delete', Gdn::Session()->UserID, $Sender->RequestArgs[1]);
+      $this->_FriendshipAction('Delete', Gdn::Session()->UserID, $Sender->RequestArgs[1], FALSE);
     }
+    $Sender->InformMessage(Gdn::Translate('Friendship request deleted'));
+    $Sender->JsonTarget(
+      ".Button.DeleteFriendship",
+      (new FriendshipsModule)->RequestFriendshipButton($Sender->RequestArgs[1]),
+      'ReplaceWith'
+    );
+    $Sender->Render('Blank', 'Utility', 'Dashboard');
   }
 
   public function ProfileController_BeforeRenderAsset_Handler($Sender, $Args) {
