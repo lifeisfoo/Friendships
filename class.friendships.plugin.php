@@ -85,7 +85,7 @@ class FriendshipsPlugin extends Gdn_Plugin {
   //dispatched from http://www.yourforum.com/plugin/Friendships/RequestFriendship
   public function Controller_RequestFriendship($Sender) {
     //The first check is only for pedantic security, since guests can only have View Permission
-    if(Gdn::Session()->IsValid() && CheckPermission('Friendships.Friends.RequestFriendship')){
+    if(Gdn::Session()->IsValid() && CheckPermission('Plugins.Friendships.Add')){
       $RedirectUrl = $this->_FriendshipAction('Request', Gdn::Session()->UserID, $Sender->RequestArgs[1], FALSE);
       if($RedirectUrl != '/'){
         $User = $this->_UserModel->GetID($Sender->RequestArgs[1]);
@@ -129,7 +129,7 @@ class FriendshipsPlugin extends Gdn_Plugin {
 
   //dispatched from http://www.yourforum.com/plugin/Friendships/DeleteFriendship
   public function Controller_DeleteFriendship($Sender) {
-    if(Gdn::Session()->IsValid() && CheckPermission('Friendships.Friends.DeleteFriendship')){
+    if(Gdn::Session()->IsValid() && CheckPermission('Plugins.Friendships.Delete')){
       $this->_FriendshipAction('Delete', Gdn::Session()->UserID, $Sender->RequestArgs[1], FALSE);
     }
     $Sender->InformMessage(Gdn::Translate('Friendship request deleted'));

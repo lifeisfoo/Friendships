@@ -95,7 +95,7 @@ class FriendshipsModule extends Gdn_Module {
 
 	public function ToString() {
 		if($this->_Sender instanceof ProfileController) {
-			if(CheckPermission('Friendships.Friends.View')){
+			if(CheckPermission('Plugins.Friendships.View')){
 				$ProfileOwnerID = $this->_Sender->User->UserID;
 				$String = '<div class="Box FriendshipsBox">';
 				$String .= '<h4>' . T('Friendships') . '</h4>';
@@ -109,7 +109,7 @@ class FriendshipsModule extends Gdn_Module {
 						//this is NOT my profile page
 						//Check if a friendship exists or a friendship request exist: 'request' or 'confirm'
 						if($this->_FriendshipModel->FriendsFrom($SessionUserID, $ProfileOwnerID)){
-							if(CheckPermission('Friendships.Friends.DeleteFriendship')){
+							if(CheckPermission('Plugins.Friendships.Delete')){
 								$String .= $this->_DeleteFriendshipButton($ProfileOwnerID);
 							}	
 						}elseif($this->_FriendshipModel->Get($SessionUserID, $ProfileOwnerID)){
@@ -121,7 +121,7 @@ class FriendshipsModule extends Gdn_Module {
 								$String .= $this->_ConfirmFriendshipButton($In->RequestedBy);
 							}
 						}else{ //show the "Request friendship" button
-							if(CheckPermission('Friendships.Friends.RequestFriendship')){
+							if(CheckPermission('Plugins.Friendships.Add')){
 								$String .= $this->RequestFriendshipButton($ProfileOwnerID);
 							}
 						}

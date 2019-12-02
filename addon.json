@@ -1,16 +1,15 @@
 {
     "description": "Allows users to being \"friends\" (send, receive and accept \"friendship requests\")",
-    "version": "0.1",
+    "version": "1.0",
     "registerPermissions": [
-        "Friendships.Friends.View",
-        "Friendships.Friends.RequestFriendship",
-        "Friendships.Friends.DeleteFriendship"
+        "Plugins.Friendships.View",
+        "Plugins.Friendships.Add",
+        "Plugins.Friendships.Delete"
     ],
     "requiredTheme": false,
     "hasLocale": false,
     "mobileFriendly": true,
     "settingsUrl": false,
-    "settingsPermission": "Garden.AdminUser.Only",
     "key": "friendships",
     "type": "addon",
     "authors": [
@@ -21,6 +20,6 @@
         }
     ],
     "require": {
-        "vanilla": ">=2.0.18.4"
+        "vanilla": ">=3.2"
     }
 }
