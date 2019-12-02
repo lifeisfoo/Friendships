@@ -146,17 +146,18 @@ class FriendshipsPlugin extends Gdn_Plugin {
     }
     $Sender->InformMessage(Gdn::Translate('Friendship request deleted'));
     $Sender->JsonTarget(
-      ".Button.DeleteFriendship",
+      ".FriendshipsBox .FriendsList",
       (new FriendshipsModule)->RequestFriendshipButton($Sender->RequestArgs[1]),
       'ReplaceWith'
     );
+    $Sender->JsonTarget(".Button.DeleteFriendship", '', 'Remove');
     $Sender->Render('Blank', 'Utility', 'Dashboard');
   }
 
   public function ProfileController_BeforeRenderAsset_Handler($Sender, $Args) {
     if($Args['AssetName'] == 'Content') {}
   }
-   
+
   public function Setup() {
     $this->Structure();
     /* unused due to vanilla bug https://github.com/vanillaforums/Garden/issues/1631
@@ -187,5 +188,4 @@ class FriendshipsPlugin extends Gdn_Plugin {
     }
     */
   }
-   
 }

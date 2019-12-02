@@ -52,12 +52,12 @@ class FriendshipsModule extends Gdn_Module {
 		$Friends = $this->_FriendshipModel->Friends($UserID);
 		$Return = '';
 		if(sizeof($Friends) > 0) {
-			$Return .= '<h5>' . T('Friends list') . '</h5>';
+			$Return .= '<div class="FriendsList"><h5>' . T('Friends list') . '</h5>';
 			$Return .= '<div class="Avatars">';
 			foreach ($Friends as $Friend) {
 				$Return .= UserPhoto($Friend);
 			}
-			$Return .= '</div>';
+			$Return .= '</div></div>';
 		}
 		return $Return;
 	}
@@ -111,7 +111,7 @@ class FriendshipsModule extends Gdn_Module {
 						if($this->_FriendshipModel->FriendsFrom($SessionUserID, $ProfileOwnerID)){
 							if(CheckPermission('Plugins.Friendships.Delete')){
 								$String .= $this->_DeleteFriendshipButton($ProfileOwnerID);
-							}	
+							}
 						}elseif($this->_FriendshipModel->Get($SessionUserID, $ProfileOwnerID)){
 							$Out = $this->_FriendshipModel->GetAbsolute($SessionUserID, $ProfileOwnerID);
 							$In = $this->_FriendshipModel->GetAbsolute($ProfileOwnerID, $SessionUserID);
@@ -130,7 +130,7 @@ class FriendshipsModule extends Gdn_Module {
 				}else{//I'm guest -> I can have only view permission (internal vanilla security rule)
 					//show friends list
 					$String .= $this->FriendsList($ProfileOwnerID);
-				}	
+				}
 				$String .= '</div>';
 				return $String;
 			}
