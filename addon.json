@@ -21,5 +21,6 @@
     ],
     "require": {
         "vanilla": ">=3.2"
-    }
+    },
+    "license": "MIT",
 }
