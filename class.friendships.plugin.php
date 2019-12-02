@@ -127,16 +127,11 @@ class FriendshipsPlugin extends Gdn_Plugin {
     }
     $Sender->InformMessage(Gdn::Translate('Friendship confirmed'));
     if(is_numeric($Sender->RequestArgs[2] ?? false)){
-      $FriendsListUserID = $Sender->RequestArgs[2];
+      $User = $this->_UserModel->GetID($Sender->RequestArgs[2]);
     }else{
-      $FriendsListUserID = $Sender->RequestArgs[1];
+      $User = $this->_UserModel->GetID($Sender->RequestArgs[1]);
     }
-    $Sender->JsonTarget(
-      ".Button.ConfirmFriendship",
-      (new FriendshipsModule)->FriendsList($FriendsListUserID),
-      'ReplaceWith'
-    );
-    $Sender->Render('Blank', 'Utility', 'Dashboard');
+    RedirectTo('/profile/'.$User->Name);
   }
 
   //dispatched from http://www.yourforum.com/plugin/Friendships/DeleteFriendship
@@ -144,14 +139,8 @@ class FriendshipsPlugin extends Gdn_Plugin {
     if(Gdn::Session()->IsValid() && CheckPermission('Plugins.Friendships.Delete')){
       $this->_FriendshipAction('Delete', Gdn::Session()->UserID, $Sender->RequestArgs[1], FALSE);
     }
-    $Sender->InformMessage(Gdn::Translate('Friendship request deleted'));
-    $Sender->JsonTarget(
-      ".FriendshipsBox .FriendsList",
-      (new FriendshipsModule)->RequestFriendshipButton($Sender->RequestArgs[1]),
-      'ReplaceWith'
-    );
-    $Sender->JsonTarget(".Button.DeleteFriendship", '', 'Remove');
-    $Sender->Render('Blank', 'Utility', 'Dashboard');
+    $User = $this->_UserModel->GetID($Sender->RequestArgs[1]);
+    RedirectTo('/profile/'.$User->Name);
   }
 
   public function ProfileController_BeforeRenderAsset_Handler($Sender, $Args) {
